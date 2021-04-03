@@ -200,7 +200,10 @@ module Spree
         # or just leave this alone to keep the default behavior.
         # Sample output: [9, 6, 3]
         def convert_package_to_dimensions_array(package)
-          []
+          return [] unless package.contents.one?
+
+          variant = package.contents.first.variant
+          [variant.width, variant.depth, variant.height]
         end
 
         # Generates an array of Package objects based on the quantities and weights of the variants in the line items
@@ -260,10 +263,14 @@ module Spree
         end
 
         def build_location address
-          ::ActiveShipping::Location.new(country: address.country.iso,
-                       state: fetch_best_state_from_address(address),
-                       city: address.city,
-                       zip: address.zipcode)
+          ::ActiveShipping::Location.new(
+            country: address.country.iso,
+            state: fetch_best_state_from_address(address),
+            city: address.city,
+            zip: address.zipcode,
+            address1: address.address1,
+            address2: address.address2
+          )
         end
 
         def retrieve_rates_from_cache package, origin, destination

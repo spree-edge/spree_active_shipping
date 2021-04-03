@@ -39,7 +39,7 @@ module SpreeActiveShippingExtension
       end
     end
 
-        # sets the manifests / assets to be precompiled, even when initialize_on_precompile is false
+    # sets the manifests / assets to be precompiled, even when initialize_on_precompile is false
     initializer "spree.assets.precompile", group: :all do |app|
       app.config.assets.precompile += %w[
         admin/product_packages/new.js
