@@ -1,9 +1,6 @@
 Active Shipping
 ===============
 
-[![Build
-Status](https://secure.travis-ci.org/spree-contrib/spree_active_shipping.png)](http://travis-ci.org/spree-contrib/spree_active_shipping)
-
 This is a Spree extension that wraps the popular [active_shipping](http://github.com/Shopify/active_shipping/tree/master) plugin.
 
 Installation
@@ -11,20 +8,11 @@ Installation
 
 1. Add this extension to your Gemfile with this line:
 
-  #### Spree >= 3.1
-
   ```ruby
-  gem 'spree_active_shipping', github: 'spree-contrib/spree_active_shipping'
+  gem 'deface'
+  gem 'active_shipping', github: 'zavan/active_shipping', branch: 'ups'
+  gem 'spree_active_shipping', github: 'zavan/spree_active_shipping', branch: 'spree4.2'
   ```
-
-  #### Spree 3.0 and Spree 2.x
-
-  ```ruby
-  gem 'spree_active_shipping', github: 'spree-contrib/spree_active_shipping', branch: 'X-X-stable'
-  ```
-
-  The `branch` option is important: it must match the version of Spree you're using.
-  For example, use `3-0-stable` if you're using Spree `3-0-stable` or any `3.0.x` version.
 
 2. Install the gem using Bundler:
   ```ruby
@@ -185,8 +173,3 @@ Be sure to bundle your dependencies and then create a dummy test app for the spe
     $ bundle
     $ bundle exec rake test_app
     $ bundle exec rspec spec
-
-Further Reading
----------------
-
-Andrea Singh has also written an excellent [blog post](http://blog.madebydna.com/all/code/2010/05/26/setting-up-usps-shipping-with-spree.html) covering the use of this extension in detail. It is rather old and somewhat outdated.
