@@ -1,6 +1,6 @@
 module Spree
   module ActiveShippingLineItemDecorator
-    def prepended(base)
+    def self.prepended(base)
       base.has_many :product_packages, through: :product
     end
   end
