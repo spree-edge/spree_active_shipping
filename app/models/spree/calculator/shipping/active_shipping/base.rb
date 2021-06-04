@@ -201,7 +201,7 @@ module Spree
         # or just leave this alone to keep the default behavior.
         # Sample output: [9, 6, 3]
         def convert_package_to_dimensions_array(package)
-          return [] unless package.contents.one?
+          return [] #unless package.contents.one?
 
           variant = package.contents.first.variant
           [variant.width, variant.depth, variant.height]
@@ -277,7 +277,7 @@ module Spree
         def retrieve_rates_from_cache package, origin, destination
           # Rails.cache.fetch(cache_key(package)) do
             shipment_packages = packages(package)
-            raise [package.inspect, origin.inspect, destination.inspect, shipment_packages.inspect].inspect
+            # raise [package.inspect, origin.inspect, destination.inspect, shipment_packages.inspect].inspect
             if shipment_packages.empty?
               {}
             else
