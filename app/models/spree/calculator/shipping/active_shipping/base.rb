@@ -22,7 +22,8 @@ module Spree
           is_package_shippable?(package)
 
           !compute(package).nil?
-        rescue Spree::ShippingError
+        rescue Spree::ShippingError => e
+          Rails.logger.error("ERROR COMPUTING PACKAGE: #{e.inspect}")
           false
         end
 
@@ -97,6 +98,7 @@ module Spree
         def retrieve_rates(origin, destination, shipment_packages)
           begin
             response = carrier.find_rates(origin, destination, shipment_packages)
+            Rails.logger.info("RATES RESPONSE: #{response.inspect}")
             # turn this beastly array into a nice little hash
             rates = response.rates.collect do |rate|
               service_name = rate.service_name.encode("UTF-8")
@@ -105,6 +107,7 @@ module Spree
             rate_hash = Hash[*rates.flatten]
             return rate_hash
           rescue ::ActiveShipping::Error => e
+            Rails.logger.error("ERROR FETCHING RATES: #{e.inspect}")
 
             if e.class == ::ActiveShipping::ResponseError && e.response.is_a?(::ActiveShipping::Response)
               params = e.response.params
@@ -254,7 +257,18 @@ module Spree
           stock_location = package.stock_location.nil? ? "" : "#{package.stock_location.id}-"
           order = package.order
           ship_address = package.order.ship_address
-          contents_hash = Digest::MD5.hexdigest(package.contents.map {|content_item| content_item.variant.id.to_s + "_" + content_item.quantity.to_s }.join("|"))
+
+          contents_hash = Digest::MD5.hexdigest(
+            package.contents.map do |content_item|
+              content_item.variant.id.to_s + "_" +
+              content_item.quantity.to_s + "_" +
+              content_item.variant.weight.to_s + "_" +
+              content_item.variant.height.to_s + "_" +
+              content_item.variant.width.to_s + "_" +
+              content_item.variant.length.to_s
+            end.join("|")
+          )
+
           @cache_key = "#{stock_location}#{carrier.name}-#{order.number}-#{ship_address.country.iso}-#{fetch_best_state_from_address(ship_address)}-#{ship_address.city}-#{ship_address.zipcode}-#{contents_hash}-#{I18n.locale}".gsub(" ","")
         end
 
@@ -267,9 +281,7 @@ module Spree
             country: address.country.iso,
             state: fetch_best_state_from_address(address),
             city: address.city,
-            zip: address.zipcode,
-            address1: address.address1,
-            address2: address.address2
+            zip: address.zipcode
           )
         end
 
