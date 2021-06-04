@@ -254,7 +254,7 @@ module Spree
         end
 
         def cache_key(package)
-          stock_location = package.stock_location.nil? ? "" : "#{package.stock_location.id}-"
+          stock_location = package.stock_location.nil? ? "" : "#{package.stock_location.id}-#{package.stock_location.country.iso}-#{fetch_best_state_from_address(package.stock_location)}-#{package.stock_location.city}-#{package.stock_location.zipcode}-"
           order = package.order
           ship_address = package.order.ship_address
 
