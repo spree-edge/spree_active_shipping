@@ -97,6 +97,7 @@ module Spree
         def retrieve_rates(origin, destination, shipment_packages)
           begin
             response = carrier.find_rates(origin, destination, shipment_packages)
+            raise response.inspect
             # turn this beastly array into a nice little hash
             rates = response.rates.collect do |rate|
               service_name = rate.service_name.encode("UTF-8")
@@ -276,6 +277,7 @@ module Spree
         def retrieve_rates_from_cache package, origin, destination
           # Rails.cache.fetch(cache_key(package)) do
             shipment_packages = packages(package)
+            raise [package.inspect, origin.inspect, destination.inspect, shipment_packages.inspect].inspect
             if shipment_packages.empty?
               {}
             else
