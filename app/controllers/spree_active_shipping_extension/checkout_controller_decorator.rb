@@ -1,7 +1,7 @@
 # handle shipping errors gracefully during checkout
 module SpreeActiveShippingExtension::CheckoutControllerDecorator
   def self.prepended(base)
-    base.rescue_from Spree::ShippingError, with: :handle_shipping_error
+    # base.rescue_from Spree::ShippingError, with: :handle_shipping_error
   end
 
   private
