@@ -265,7 +265,7 @@ module Spree
               content_item.variant.weight.to_s + "_" +
               content_item.variant.height.to_s + "_" +
               content_item.variant.width.to_s + "_" +
-              content_item.variant.length.to_s
+              content_item.variant.depth.to_s
             end.join("|")
           )
 
