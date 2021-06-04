@@ -22,8 +22,8 @@ module Spree
           is_package_shippable?(package)
 
           !compute(package).nil?
-        rescue Spree::ShippingError
-          false
+        # rescue Spree::ShippingError
+          # false
         end
 
         def compute_package(package)
