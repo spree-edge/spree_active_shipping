@@ -98,13 +98,16 @@ module Spree
         def retrieve_rates(origin, destination, shipment_packages)
           begin
             response = carrier.find_rates(origin, destination, shipment_packages)
-            Rails.logger.info("RATES RESPONSE: #{response.inspect}")
+            Rails.logger.debug("RATES RESPONSE: #{response.inspect}")
             # turn this beastly array into a nice little hash
             rates = response.rates.collect do |rate|
               service_name = rate.service_name.encode("UTF-8")
               [CGI.unescapeHTML(service_name), rate.price]
             end
             rate_hash = Hash[*rates.flatten]
+
+            Rails.logger.info("FINAL RATES: #{rate_hash}")
+
             return rate_hash
           rescue ::ActiveShipping::Error => e
             Rails.logger.error("ERROR FETCHING RATES: #{e.inspect}")
@@ -159,19 +162,20 @@ module Spree
           multiplier = Spree::ActiveShipping::Config[:unit_multiplier]
           default_weight = Spree::ActiveShipping::Config[:default_weight]
           max_weight = get_max_weight(package)
+          weights = []
 
-          weights = package.contents.map do |content_item|
+          package.contents.each do |content_item|
             item_weight = content_item.variant.weight.to_f
             item_weight = default_weight if item_weight <= 0
             item_weight *= multiplier
 
             if max_weight <= 0 || item_weight < max_weight
-              item_weight
+              content_item.quantity.times { weights << item_weight }
             else
               raise Spree::ShippingError.new("#{I18n.t(:shipping_error)}: The maximum per package weight for the selected service from the selected country is #{max_weight} ounces.")  
             end
           end
-          weights.flatten.compact.sort
+          weights.sort
         end
 
         def convert_package_to_item_packages_array(package)
