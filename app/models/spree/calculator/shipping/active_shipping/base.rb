@@ -237,6 +237,8 @@ module Spree
             packages << ::ActiveShipping::Package.new(package.at(0), [package.at(1), package.at(2), package.at(3)], units: :imperial)
           end
 
+          Rails.logger.info(packages.inspect)
+
           packages
         end
 
