@@ -22,7 +22,8 @@ module Spree
           is_package_shippable?(package)
 
           !compute(package).nil?
-        rescue Spree::ShippingError
+        rescue Spree::ShippingError => e
+          Rails.logger.error("ERROR COMPUTING PACKAGE: #{e.inspect}")
           false
         end
 
@@ -97,14 +98,19 @@ module Spree
         def retrieve_rates(origin, destination, shipment_packages)
           begin
             response = carrier.find_rates(origin, destination, shipment_packages)
+            Rails.logger.debug("RATES RESPONSE: #{response.inspect}")
             # turn this beastly array into a nice little hash
             rates = response.rates.collect do |rate|
               service_name = rate.service_name.encode("UTF-8")
               [CGI.unescapeHTML(service_name), rate.price]
             end
             rate_hash = Hash[*rates.flatten]
+
+            Rails.logger.info("FINAL RATES: #{rate_hash}")
+
             return rate_hash
           rescue ::ActiveShipping::Error => e
+            Rails.logger.error("ERROR FETCHING RATES: #{e.inspect}")
 
             if e.class == ::ActiveShipping::ResponseError && e.response.is_a?(::ActiveShipping::Response)
               params = e.response.params
@@ -156,19 +162,20 @@ module Spree
           multiplier = Spree::ActiveShipping::Config[:unit_multiplier]
           default_weight = Spree::ActiveShipping::Config[:default_weight]
           max_weight = get_max_weight(package)
+          weights = []
 
-          weights = package.contents.map do |content_item|
+          package.contents.each do |content_item|
             item_weight = content_item.variant.weight.to_f
             item_weight = default_weight if item_weight <= 0
             item_weight *= multiplier
 
             if max_weight <= 0 || item_weight < max_weight
-              item_weight
+              content_item.quantity.times { weights << item_weight }
             else
               raise Spree::ShippingError.new("#{I18n.t(:shipping_error)}: The maximum per package weight for the selected service from the selected country is #{max_weight} ounces.")  
             end
           end
-          weights.flatten.compact.sort
+          weights.sort
         end
 
         def convert_package_to_item_packages_array(package)
@@ -200,7 +207,10 @@ module Spree
         # or just leave this alone to keep the default behavior.
         # Sample output: [9, 6, 3]
         def convert_package_to_dimensions_array(package)
-          []
+          return [] unless package.contents.one?
+
+          variant = package.contents.first.variant
+          [variant.width, variant.depth, variant.height]
         end
 
         # Generates an array of Package objects based on the quantities and weights of the variants in the line items
@@ -231,6 +241,8 @@ module Spree
             packages << ::ActiveShipping::Package.new(package.at(0), [package.at(1), package.at(2), package.at(3)], units: :imperial)
           end
 
+          Rails.logger.info(packages.inspect)
+
           packages
         end
 
@@ -248,10 +260,21 @@ module Spree
         end
 
         def cache_key(package)
-          stock_location = package.stock_location.nil? ? "" : "#{package.stock_location.id}-"
+          stock_location = package.stock_location.nil? ? "" : "#{package.stock_location.id}-#{package.stock_location.country.iso}-#{fetch_best_state_from_address(package.stock_location)}-#{package.stock_location.city}-#{package.stock_location.zipcode}-"
           order = package.order
           ship_address = package.order.ship_address
-          contents_hash = Digest::MD5.hexdigest(package.contents.map {|content_item| content_item.variant.id.to_s + "_" + content_item.quantity.to_s }.join("|"))
+
+          contents_hash = Digest::MD5.hexdigest(
+            package.contents.map do |content_item|
+              content_item.variant.id.to_s + "_" +
+              content_item.quantity.to_s + "_" +
+              content_item.variant.weight.to_s + "_" +
+              content_item.variant.height.to_s + "_" +
+              content_item.variant.width.to_s + "_" +
+              content_item.variant.depth.to_s
+            end.join("|")
+          )
+
           @cache_key = "#{stock_location}#{carrier.name}-#{order.number}-#{ship_address.country.iso}-#{fetch_best_state_from_address(ship_address)}-#{ship_address.city}-#{ship_address.zipcode}-#{contents_hash}-#{I18n.locale}".gsub(" ","")
         end
 
@@ -260,10 +283,12 @@ module Spree
         end
 
         def build_location address
-          ::ActiveShipping::Location.new(country: address.country.iso,
-                       state: fetch_best_state_from_address(address),
-                       city: address.city,
-                       zip: address.zipcode)
+          ::ActiveShipping::Location.new(
+            country: address.country.iso,
+            state: fetch_best_state_from_address(address),
+            city: address.city,
+            zip: address.zipcode
+          )
         end
 
         def retrieve_rates_from_cache package, origin, destination
