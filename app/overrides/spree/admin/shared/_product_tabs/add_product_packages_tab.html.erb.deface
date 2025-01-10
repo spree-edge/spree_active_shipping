@@ -1,8 +1,0 @@
-<!-- insert_bottom "[data-hook='admin_product_tabs']" -->
-
-<%= content_tag :li do %>
-  <%= link_to_with_icon 'envelope.svg',
-    Spree.t(:product_packages),
-    admin_product_product_packages_url(@product),
-    class: "nav-link #{'active' if current == 'Product Packages'}" %>
-<% end if can?(:update, @product.product_packages.build) %>

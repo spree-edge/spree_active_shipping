@@ -1,93 +1,100 @@
-<%= render partial: 'spree/admin/shared/sub_menu/configuration' %>
-
 <% content_for :page_title do %>
   <%= Spree.t(:active_shipping_settings) %>
 <% end %>
 
-<%= form_tag admin_active_shipping_settings_path, method: :put  do |form| %>
+<%= form_tag admin_active_shipping_settings_path, method: :put do %>
   <div id="preferences" data-hook>
-    <fieldset class="general no-border-top">
-      <div class="row">
+    <fieldset class="general border rounded bg-white p-4">
+      <div class="row gy-4">
+        <!-- UPS Settings -->
         <div class="col-md-6">
-          <fieldset class="security no-border-bottom">
-            <legend align="center"><%= Spree.t(:ups_settings)%></legend>
+          <fieldset class="p-3">
+            <legend class="text-left fw-bold"><%= Spree.t(:ups_settings) %></legend>
             <% @preferences_UPS.each do |key|
                 type = @config.preference_type(key) %>
-                <div class="field">
-                  <%= label_tag(key, Spree.t(key) + ': ') + tag(:br) if type != :boolean %>
-                  <%= preference_field_tag(key, @config[key], type: type) %>
-                  <%= label_tag(key, Spree.t(key)) + tag(:br) if type == :boolean %>
+                <div class="mb-3">
+                  <%= label_tag(key, Spree.t(key), class: "form-label") if type != :boolean %>
+                  <%= preference_field_tag(key, @config[key], type: type, class: "form-control") %>
+                  <%= label_tag(key, Spree.t(key), class: "form-check-label") if type == :boolean %>
                 </div>
             <% end %>
           </fieldset>
         </div>
+
+        <!-- FedEx Settings -->
         <div class="col-md-6">
-          <fieldset class="currency no-border-bottom">
-            <legend align="center"><%= Spree.t(:fedex_settings)%></legend>
+          <fieldset class="p-3">
+            <legend class="text-left fw-bold"><%= Spree.t(:fedex_settings) %></legend>
             <% @preferences_FedEx.each do |key|
                 type = @config.preference_type(key) %>
-                <div class="field">
-                  <%= label_tag(key, Spree.t(key) + ': ') + tag(:br) if type != :boolean %>
-                  <%= preference_field_tag(key, @config[key], type: type) %>
-                  <%= label_tag(key, Spree.t(key)) + tag(:br) if type == :boolean %>
+                <div class="mb-3">
+                  <%= label_tag(key, Spree.t(key), class: "form-label") if type != :boolean %>
+                  <%= preference_field_tag(key, @config[key], type: type, class: "form-control") %>
+                  <%= label_tag(key, Spree.t(key), class: "form-check-label") if type == :boolean %>
                 </div>
             <% end %>
           </fieldset>
         </div>
       </div>
 
-      <div class="row">
+      <div class="row gy-4">
+        <!-- USPS Settings -->
         <div class="col-md-6">
-          <fieldset class="security no-border-bottom">
-            <legend align="center"><%= Spree.t(:usps_settings)%></legend>
+          <fieldset class="p-3">
+            <legend class="text-left fw-bold"><%= Spree.t(:usps_settings) %></legend>
             <% @preferences_USPS.each do |key|
                 type = @config.preference_type(key) %>
-                <div class="field">
-                  <%= label_tag(key, Spree.t(key) + ': ') + tag(:br) if type != :boolean %>
-                  <%= preference_field_tag(key, @config[key], type: type) %>
-                  <%= label_tag(key, Spree.t(key)) + tag(:br) if type == :boolean %>
+                <div class="mb-3">
+                  <%= label_tag(key, Spree.t(key), class: "form-label") if type != :boolean %>
+                  <%= preference_field_tag(key, @config[key], type: type, class: "form-control") %>
+                  <%= label_tag(key, Spree.t(key), class: "form-check-label") if type == :boolean %>
                 </div>
             <% end %>
           </fieldset>
         </div>
+
+        <!-- Canada Post Settings -->
         <div class="col-md-6">
-          <fieldset class="currency no-border-bottom">
-            <legend align="center"><%= Spree.t(:canada_post_settings)%></legend>
+          <fieldset class="p-3">
+            <legend class="text-left fw-bold"><%= Spree.t(:canada_post_settings) %></legend>
             <% @preferences_CanadaPost.each do |key|
                 type = @config.preference_type(key) %>
-                <div class="field">
-                  <%= label_tag(key, Spree.t(key) + ': ') + tag(:br) if type != :boolean %>
-                  <%= preference_field_tag(key, @config[key], type: type) %>
-                  <%= label_tag(key, Spree.t(key)) + tag(:br) if type == :boolean %>
-                </div>
-            <% end %>
-          </fieldset>
-        </div>
-        <div class="col-md-6">
-          <fieldset class="currency no-border-bottom">
-            <legend align="center"><%= Spree.t(:australia_post_settings)%></legend>
-            <% @preferences_AustraliaPost.each do |key|
-              type = @config.preference_type(key) %>
-                <div class="field">
-                  <%= label_tag(key, Spree.t(key) + ': ') + tag(:br) if type != :boolean %>
-                  <%= preference_field_tag(key, @config[key], type: type) %>
-                  <%= label_tag(key, Spree.t(key)) + tag(:br) if type == :boolean %>
+                <div class="mb-3">
+                  <%= label_tag(key, Spree.t(key), class: "form-label") if type != :boolean %>
+                  <%= preference_field_tag(key, @config[key], type: type, class: "form-control") %>
+                  <%= label_tag(key, Spree.t(key), class: "form-check-label") if type == :boolean %>
                 </div>
             <% end %>
           </fieldset>
         </div>
       </div>
 
-      <div class="row">
+      <div class="row gy-4">
+        <!-- Australia Post Settings -->
         <div class="col-md-6">
-          <fieldset class="currency no-border-bottom">
-            <legend align="center"><%= Spree.t(:general_settings)%></legend>
+          <fieldset class="p-3">
+            <legend class="text-left fw-bold"><%= Spree.t(:australia_post_settings) %></legend>
+            <% @preferences_AustraliaPost.each do |key|
+                type = @config.preference_type(key) %>
+                <div class="mb-3">
+                  <%= label_tag(key, Spree.t(key), class: "form-label") if type != :boolean %>
+                  <%= preference_field_tag(key, @config[key], type: type, class: "form-control") %>
+                  <%= label_tag(key, Spree.t(key), class: "form-check-label") if type == :boolean %>
+                </div>
+            <% end %>
+          </fieldset>
+        </div>
+
+        <!-- General Settings -->
+        <div class="col-md-6">
+          <fieldset class="p-3">
+            <legend class="text-left fw-bold"><%= Spree.t(:general_settings) %></legend>
             <% @preferences_GeneralSettings.each do |key|
                 type = @config.preference_type(key) %>
-                <div class="field">
-                  <%= label_tag(key, Spree.t(key) + ': ') + tag(:br) if type != :boolean %>
+                <div class="mb-3">
+                  <%= label_tag(key, Spree.t(key), class: "form-label") if type != :boolean %>
                   <%= preference_field_tag(key, @config[key], type: type) %>
-                  <%= label_tag(key, Spree.t(key)) + tag(:br) if type == :boolean %>
+                  <%= label_tag(key, Spree.t(key), class: "form-check-label") if type == :boolean %>
                 </div>
             <% end %>
           </fieldset>
@@ -95,7 +102,6 @@
       </div>
 
       <%= render partial: 'spree/admin/shared/edit_resource_links', locals: { collection_url: edit_admin_active_shipping_settings_url } %>
-
     </fieldset>
   </div>
 <% end %>

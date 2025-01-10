@@ -1,9 +1,9 @@
 module Spree::ActiveShipping
 end
+
 module SpreeActiveShippingExtension
   class Engine < Rails::Engine
-
-    initializer "spree.active_shipping.preferences", :before => :load_config_initializers do |app|
+    config.after_initialize do
       Spree::ActiveShipping::Config = Spree::ActiveShippingConfiguration.new
     end
 
@@ -16,30 +16,27 @@ module SpreeActiveShippingExtension
         Rails.configuration.cache_classes ? require(c) : load(c)
       end
 
-      #Only required until following active_shipping commit is merged (add negotiated rates).
-      #http://github.com/BDQ/active_shipping/commit/2f2560d53aa7264383e5a35deb7264db60eb405a
       ActiveShipping::UPS.send(:include, Spree::ActiveShipping::UpsOverride)
-
-      # Fix Canada Post "Ready to ship" package
       ActiveShipping::CanadaPost.send(:include, Spree::ActiveShipping::CanadaPostOverride)
     end
 
     config.autoload_paths += %W(#{config.root}/lib)
     config.to_prepare &method(:activate).to_proc
 
-    initializer "spree_active_shipping.register.calculators", after: "spree.register.calculators" do |app|
-      if app.config.spree.calculators.shipping_methods
-        classes = Dir.chdir File.join(File.dirname(__FILE__), "../../app/models") do
-          Dir["spree/calculator/**/*.rb"].reject {|path| path =~ /base.rb$/ }.map do |path|
-            path.gsub('.rb', '').camelize.constantize
-          end
-        end
-
-        app.config.spree.calculators.shipping_methods.concat classes
+    config.after_initialize do
+      if Rails.application.config.spree.calculators.shipping_methods
+        calculators_path = File.expand_path("../../app/models/spree/calculator", __dir__)
+    
+        classes = Dir.glob(File.join(calculators_path, "**/*.rb"))
+                     .reject { |path| path =~ /base\.rb$/ }
+                     .map do |path|
+                       base_path = "/home/ishan/apps/spree_active_shipping/app/models/"
+                       path.sub(base_path, '').sub('.rb', '').gsub('/', '::').split('::').map { |word| word.split('_').map(&:capitalize).join }.join('::').constantize
+                     end
+        Rails.application.config.spree.calculators.shipping_methods.concat(classes)
       end
     end
 
-    # sets the manifests / assets to be precompiled, even when initialize_on_precompile is false
     initializer "spree.assets.precompile", group: :all do |app|
       app.config.assets.precompile += %w[
         admin/product_packages/new.js
