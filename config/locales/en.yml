@@ -1,5 +1,7 @@
 ---
 en:
+  spree:
+    save_changes: "Save Changes"
   fedex:
     express_saver: "FedEx Express Saver"
     first_overnight: "FedEx First Overnight"

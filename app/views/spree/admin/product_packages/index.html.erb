@@ -1,18 +1,13 @@
 <% content_for :page_actions do %>
-  <%= button_link_to Spree.t(:new_package), new_admin_product_product_package_url(@product), { class: "btn-success", icon: 'add', id: 'new_product_package_link' } %>
+  <%= button_link_to Spree.t(:new_package), new_admin_product_product_package_url(@product), { class: "btn-primary", icon: 'add.svg', id: 'new_product_package_link' } %>
 <% end %>
 
-<% content_for :head do %>
-  <%= javascript_include_tag 'admin/product_packages/index.js' %>
-<% end %>
-
-<%= render partial: 'spree/admin/shared/sub_menu/product' %>
 <%= render partial: 'spree/admin/shared/product_tabs', locals: { current: 'Product Packages' } %>
 
 <div id="product_packages" data-hook></div>
 
 <% unless @product.reload.product_packages.any? %>
-  <div class="no-objects-found">
+  <div class="no-objects-found text-center">
     <%= Spree.t(:no_packages_found) %>.
   </div>
 <% else %>
